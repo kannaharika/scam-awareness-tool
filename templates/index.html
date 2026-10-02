@@ -133,42 +133,18 @@ function applyLang() {
   document.getElementById("analyzeBtn").textContent = u.button;
   document.getElementById("privacy").textContent = u.privacy;
   document.getElementById("hint").textContent = u.hint;
-  document.getElementById("foundTitle").textContent = u.foundTitle;
-  document.getElementById("actionTitle").textContent = u.actionTitle;
-  document.getElementById("changeLang").textContent = u.changeLang;
-}
-
-function setLang(l) {
-  lang = l;
-  document.getElementById("chooser").classList.add("hidden");
-  applyLang();
-  // re-translate an existing result
-  if (!document.getElementById("out").classList.contains("hidden")) run();
-}
-
-async function run() {
-  const message = document.getElementById("msg").value;
-  const u = UI[lang];
-  const res = await fetch("/api/analyze", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({message, lang})
-  });
-  const d = await res.json();
-  document.getElementById("out").classList.remove("hidden");
-  document.getElementById("level").textContent = d.level;
-  const fill = document.getElementById("fill");
-  fill.style.width = d.score + "%";
-  fill.style.background = d.score >= 60 ? "var(--bad)" : d.score >= 35 ? "var(--warn)" : "var(--ok)";
-  document.getElementById("scores").textContent =
-    u.score + ": " + d.score + "/100" + (d.ml_score !== null ? "  |  " + u.ml + ": " + d.ml_score + "%" : "");
-  document.getElementById("explain").textContent = d.explanation;
-  document.getElementById("detected").textContent = d.detected_languages ? u.detectedLabel + ": " + d.detected_languages : "";
-  const note = document.getElementById("noteCard");
-  document.getElementById("noteText").textContent = d.language_note || "";
-  note.classList.toggle("hidden", !d.language_note);
   document.getElementById("found").innerHTML = d.indicators_found.length
-    ? d.indicators_found.map(i => `<div class="row"><div>${i.label}<div class="why">${i.why}</div></div><span class="yes">✓</span></div>`).join("")
+  ? d.indicators_found.map(i => `
+    <div class="row">
+      <div>
+        <strong>${escapeHTML(i.label)}</strong>
+        <div class="why">${escapeHTML(i.why)}</div>
+        ${i.matched_text ? `<div class="why">Matched: <mark>${escapeHTML(i.matched_text)}</mark></div>` : ""}
+      </div>
+      <span class="yes">✓</span>
+    </div>
+  `).join("")
+  : `<p class="why">${escapeHTML(u.none)}</p>`;
     : `<p class='why'>${u.none}</p>`;
   document.getElementById("actions").innerHTML = d.actions.map(a => `<li>${a}</li>`).join("");
   document.getElementById("disc").textContent = d.disclaimer;
