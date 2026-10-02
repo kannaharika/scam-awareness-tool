@@ -15,10 +15,20 @@ FULLY_SUPPORTED = {"latin", "telugu", "devanagari"}
 THRESHOLD = 3      # total indicator weight needed before any warning is shown
 MAX_WEIGHT = 7     # weight at which the rule score is 100%
 
-# (key, weight, English regex, Telugu regex)
-INDICATORS = [
-    ("urgency", 1,
-     r"\b(urgent(ly)?|immediately|right now|asap|act now|within \d+ ?(hours?|hrs|minutes|mins)|last chance|final warning|expires? (today|tonight|soon)|will expire|limited time)\b",
+ for key, label, pattern, why in INDICATORS:
+    match = re.search(pattern, text, flags=re.IGNORECASE)
+
+    item = {
+        "key": key,
+        "label": label,
+        "why": why
+    }
+
+    if match:
+        item["matched_text"] = match.group(0)
+        found.append(item)
+    else:
+        not_found.append(item)
      r"అత్యవసరం|అర్జెంట్|వెంటనే|ఇప్పుడే|తక్షణమే|చివరి అవకాశం|గంటల్లో|గంటలలోపు|\b(ventane|ippude|twaraga|tvaraga)\b"),
     ("prize", 1,
      r"\b(you (have )?won|winner|lottery|lucky (draw|customer)|free (iphone|gift|recharge)|prize|selected for|congratulations[^.!?]{0,40}(won|win|prize|reward|selected|lucky))",
